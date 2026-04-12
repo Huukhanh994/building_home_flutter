@@ -26,6 +26,9 @@ dependencies:
   # Camera / image picker
   image_picker: ^1.1.2
 
+  # HTTP client (backend API)
+  http: ^1.2.2
+
   # Local persistence
   shared_preferences: ^2.3.2
 

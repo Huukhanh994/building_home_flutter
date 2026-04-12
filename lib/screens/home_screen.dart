@@ -3,6 +3,7 @@ import '../theme/app_theme.dart';
 import '../widgets/app_card.dart';
 import 'calculator_screen.dart';
 import 'history_screen.dart';
+import 'interactive_house_screen.dart';
 import 'photo_calculator_screen.dart';
 import 'templates_screen.dart';
 
@@ -52,6 +53,18 @@ class HomeScreen extends StatelessWidget {
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const TemplatesScreen()),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _ActionCard(
+                  icon: Icons.touch_app_rounded,
+                  title: 'Nhà Tương Tác',
+                  subtitle: 'Chạm vào bộ phận để xem vật liệu & chi phí',
+                  color: const Color(0xFF7C3AED),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const InteractiveHouseScreen()),
                   ),
                 ),
                 const SizedBox(height: 20),

@@ -16,7 +16,14 @@
       "Bash(/usr/libexec/java_home -V)",
       "Bash(flutter doctor:*)",
       "Bash(JAVA_HOME=\"/Applications/Android Studio.app/Contents/jbr/Contents/Home\" flutter run:*)",
-      "Bash(dart analyze:*)"
+      "Bash(dart analyze:*)",
+      "Bash(flutter build:*)",
+      "Bash(php --version)",
+      "Bash(composer --version)",
+      "Bash(laravel --version)",
+      "Bash(laravel new:*)",
+      "Bash(php artisan:*)",
+      "Bash(curl -s -X POST http://buildhome-api.test/api/v1/component/calculate -H 'Content-Type: application/json' -d '{\"component\":\"roof_main\",\"area\":120,\"house_type\":\"thai_roof\",\"floors\":1}')"
     ]
   }
 }
