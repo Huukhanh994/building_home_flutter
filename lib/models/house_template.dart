@@ -1,3 +1,4 @@
+import 'blueprint_layout.dart';
 import 'house_type.dart';
 
 class HouseTemplate {
@@ -11,6 +12,9 @@ class HouseTemplate {
   final String description;
   final List<String> features;
 
+  /// Ground-floor blueprint. Null falls back to the auto-generated layout.
+  final BlueprintLayout? blueprint;
+
   const HouseTemplate({
     required this.id,
     required this.name,
@@ -21,5 +25,6 @@ class HouseTemplate {
     required this.roofStyle,
     required this.description,
     required this.features,
+    this.blueprint,
   });
 }

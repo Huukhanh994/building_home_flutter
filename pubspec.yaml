@@ -26,8 +26,11 @@ dependencies:
   # Camera / image picker
   image_picker: ^1.1.2
 
-  # State (lightweight)
-  provider: ^6.1.2
+  # Local persistence
+  shared_preferences: ^2.3.2
+
+  # In-app purchases
+  in_app_purchase: ^3.2.0
 
 dev_dependencies:
   flutter_test:

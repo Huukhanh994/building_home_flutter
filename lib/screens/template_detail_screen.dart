@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../data/cost_config.dart';
 import '../models/house_template.dart';
+import '../services/blueprint_generator.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_card.dart';
+import '../widgets/house_layout_painter.dart';
 import 'calculator_screen.dart';
 
 class TemplateDetailScreen extends StatelessWidget {
@@ -27,6 +30,8 @@ class TemplateDetailScreen extends StatelessWidget {
                 _buildSpecsGrid(context),
                 const SizedBox(height: 14),
                 _buildFeaturesCard(context),
+                const SizedBox(height: 14),
+                _buildBlueprintCard(context),
                 const SizedBox(height: 14),
                 _buildCostCard(context),
                 const SizedBox(height: 16),
@@ -197,11 +202,30 @@ class TemplateDetailScreen extends StatelessWidget {
     );
   }
 
+  // ── Blueprint ─────────────────────────────────────────────────────────────
+
+  Widget _buildBlueprintCard(BuildContext context) {
+    // Use the hand-crafted layout if available, fall back to auto-generated.
+    final layout = template.blueprint ??
+        BlueprintGenerator.forHouseType(template.type, template.floors);
+
+    // Derive representative dimensions from template area and floor count
+    final floorArea = template.area / template.floors;
+    final width  = (floorArea / 1.5).clamp(4.0, 30.0);
+    final length = (floorArea / width).clamp(4.0, 50.0);
+
+    return HouseLayoutCard(
+      layout: layout,
+      houseWidth: width,
+      houseLength: length,
+    );
+  }
+
   // ── Cost ──────────────────────────────────────────────────────────────────
 
   Widget _buildCostCard(BuildContext context) {
-    final structural = template.estimatedCost * 0.6;
-    final finishing = template.estimatedCost * 0.4;
+    final structural = template.estimatedCost * CostConfig.structuralFraction;
+    final finishing  = template.estimatedCost * CostConfig.finishingFraction;
 
     return AppCard(
       child: Column(
@@ -296,10 +320,25 @@ class TemplateDetailScreen extends StatelessWidget {
 
   Widget _buildCtaButton(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const CalculatorScreen()),
-      ),
+      onPressed: () {
+        // Derive default width/length from template area using a 1:1.5 ratio.
+        // Users can adjust in the calculator.
+        final floorArea = template.area / template.floors;
+        final width  = (floorArea / 1.5).floorToDouble().clamp(4.0, 30.0);
+        final length = (floorArea / width).floorToDouble().clamp(4.0, 50.0);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CalculatorScreen(
+              initialName: template.name,
+              initialWidth: width,
+              initialLength: length,
+              initialFloors: template.floors,
+              initialHouseType: template.type,
+            ),
+          ),
+        );
+      },
       icon: const Icon(Icons.functions_rounded),
       label: const Text('Tính Cho Kích Thước Của Bạn'),
     );

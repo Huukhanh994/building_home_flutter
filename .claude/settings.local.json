@@ -2,7 +2,21 @@
   "permissions": {
     "allow": [
       "Bash(flutter pub:*)",
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(flutter test:*)",
+      "Bash(flutter clean:*)",
+      "Bash(flutter run:*)",
+      "Bash(rm -rf /Users/khanhho/.gradle/caches/8.11.1/kotlin-dsl)",
+      "Read(//Users/khanhho/.gradle/caches/**)",
+      "Bash(flutter --version)",
+      "Bash(./gradlew --stop)",
+      "Bash(rm -rf /Users/khanhho/.gradle/caches/8.11.1)",
+      "Read(//Users/khanhho/Library/Android/sdk/cmdline-tools/latest/**)",
+      "Read(//Users/khanhho/Library/**)",
+      "Bash(/usr/libexec/java_home -V)",
+      "Bash(flutter doctor:*)",
+      "Bash(JAVA_HOME=\"/Applications/Android Studio.app/Contents/jbr/Contents/Home\" flutter run:*)",
+      "Bash(dart analyze:*)"
     ]
   }
 }

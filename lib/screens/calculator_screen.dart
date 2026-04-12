@@ -1,14 +1,33 @@
+import 'dart:math' show sqrt;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/house_type.dart';
 import '../models/project_model.dart';
+import '../models/region.dart';
 import '../services/material_calculator.dart';
+import '../services/preferences_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_card.dart';
 import 'results_screen.dart';
 
+enum _InputMode { dimensions, area }
+
 class CalculatorScreen extends StatefulWidget {
-  const CalculatorScreen({super.key});
+  const CalculatorScreen({
+    super.key,
+    this.initialWidth,
+    this.initialLength,
+    this.initialFloors,
+    this.initialHouseType,
+    this.initialName,
+  });
+
+  final double? initialWidth;
+  final double? initialLength;
+  final int? initialFloors;
+  final HouseType? initialHouseType;
+  final String? initialName;
 
   @override
   State<CalculatorScreen> createState() => _CalculatorScreenState();
@@ -16,27 +35,65 @@ class CalculatorScreen extends StatefulWidget {
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController   = TextEditingController();
-  final _widthController  = TextEditingController();
-  final _lengthController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _widthController;
+  late final TextEditingController _lengthController;
+  late final TextEditingController _areaController;
 
-  int _floors           = 1;
-  HouseType _houseType  = HouseType.twoStory;
+  late int _floors;
+  late HouseType _houseType;
+  Region _region = Region.other;
+  _InputMode _inputMode = _InputMode.dimensions;
 
   double? get _width  => double.tryParse(_widthController.text);
   double? get _length => double.tryParse(_lengthController.text);
+  double? get _areaInput => double.tryParse(_areaController.text);
 
-  bool get _isValid =>
-      (_width ?? 0) > 0 && (_length ?? 0) > 0;
+  bool get _isValid {
+    if (_inputMode == _InputMode.dimensions) {
+      return (_width ?? 0) > 0 && (_length ?? 0) > 0;
+    }
+    return (_areaInput ?? 0) > 0;
+  }
 
-  double get _liveArea =>
-      (_width ?? 0) * (_length ?? 0) * _floors;
+  double get _liveArea {
+    if (_inputMode == _InputMode.dimensions) {
+      return (_width ?? 0) * (_length ?? 0) * _floors;
+    }
+    return (_areaInput ?? 0) * _floors;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController  = TextEditingController(text: widget.initialName ?? '');
+    _widthController = TextEditingController(
+      text: widget.initialWidth != null
+          ? widget.initialWidth!.toStringAsFixed(1)
+          : '',
+    );
+    _lengthController = TextEditingController(
+      text: widget.initialLength != null
+          ? widget.initialLength!.toStringAsFixed(1)
+          : '',
+    );
+    _areaController = TextEditingController();
+    _floors    = widget.initialFloors ?? 1;
+    _houseType = widget.initialHouseType ?? HouseType.twoStory;
+    _loadRegion();
+  }
+
+  Future<void> _loadRegion() async {
+    final region = await PreferencesService.getLastRegion();
+    if (mounted) setState(() => _region = region);
+  }
 
   @override
   void dispose() {
     _nameController.dispose();
     _widthController.dispose();
     _lengthController.dispose();
+    _areaController.dispose();
     super.dispose();
   }
 
@@ -62,14 +119,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  // ── Form Card ─────────────────────────────────────────────────────────────
+  // ── Form Card ───────────────────────────────────────────────────────���─────
 
   Widget _buildFormCard(BuildContext context) {
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Project name
           _sectionLabel('Tên Công Trình (tuỳ chọn)'),
           const SizedBox(height: 6),
           TextFormField(
@@ -81,27 +137,39 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           ),
 
           const SizedBox(height: 20),
-          _sectionLabel('Kích Thước Mặt Bằng (m)'),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: _dimensionField(
-                  controller: _widthController,
-                  label: 'Chiều rộng',
-                  hint: '0.0',
+          _buildInputModeToggle(context),
+          const SizedBox(height: 12),
+          if (_inputMode == _InputMode.dimensions) ...[
+            _sectionLabel('Kích Thước Mặt Bằng (m)'),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: _dimensionField(
+                    controller: _widthController,
+                    label: 'Chiều rộng',
+                    hint: '0.0',
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _dimensionField(
-                  controller: _lengthController,
-                  label: 'Chiều dài',
-                  hint: '0.0',
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _dimensionField(
+                    controller: _lengthController,
+                    label: 'Chiều dài',
+                    hint: '0.0',
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ] else ...[
+            _sectionLabel('Diện Tích Mặt Bằng (m²)'),
+            const SizedBox(height: 6),
+            _dimensionField(
+              controller: _areaController,
+              label: 'Diện tích/tầng',
+              hint: '0.0',
+            ),
+          ],
 
           const SizedBox(height: 20),
           _sectionLabel('Số Tầng'),
@@ -113,12 +181,54 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           const SizedBox(height: 8),
           ...HouseType.values.map((type) => _buildHouseTypeRow(context, type)),
 
-          // Live area preview
+          const SizedBox(height: 20),
+          _sectionLabel('Vùng Miền'),
+          const SizedBox(height: 8),
+          _buildRegionPicker(context),
+
           if (_isValid) ...[
             const SizedBox(height: 16),
             _buildAreaPreview(context),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildInputModeToggle(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: _InputMode.values.map((mode) {
+          final selected = _inputMode == mode;
+          final label = mode == _InputMode.dimensions ? 'Rộng × Dài (m)' : 'Diện tích (m²)';
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _inputMode = mode),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                margin: const EdgeInsets.all(4),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.green500 : Colors.transparent,
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: selected ? Colors.white : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -143,10 +253,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-        ),
+        Text(label,
+            style: const TextStyle(
+                fontSize: 12, color: AppColors.textSecondary)),
         const SizedBox(height: 4),
         TextFormField(
           controller: controller,
@@ -220,11 +329,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         onTap: () => setState(() => _houseType = type),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: selected
-                ? AppColors.green100
-                : const Color(0xFFF3F4F6),
+            color: selected ? AppColors.green100 : const Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(10),
             border: selected
                 ? Border.all(color: AppColors.green500, width: 1.5)
@@ -232,11 +340,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           ),
           child: Row(
             children: [
-              Icon(
-                type.icon,
-                color: selected ? AppColors.green500 : AppColors.textSecondary,
-                size: 22,
-              ),
+              Icon(type.icon,
+                  color: selected
+                      ? AppColors.green500
+                      : AppColors.textSecondary,
+                  size: 22),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -255,7 +363,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     Text(
                       '${_formatVnd(type.costPerM2)}/m²',
                       style: const TextStyle(
-                          fontSize: 11, color: AppColors.textSecondary),
+                          fontSize: 11,
+                          color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -265,6 +374,55 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     color: AppColors.green500),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRegionPicker(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<Region>(
+          value: _region,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+          style: Theme.of(context).textTheme.bodyLarge,
+          onChanged: (r) {
+            if (r == null) return;
+            setState(() => _region = r);
+            PreferencesService.saveLastRegion(r);
+          },
+          items: Region.values
+              .map(
+                (r) => DropdownMenuItem(
+                  value: r,
+                  child: Row(
+                    children: [
+                      Text(r.label),
+                      const SizedBox(width: 8),
+                      Text(
+                        r.multiplier == 1.0
+                            ? ''
+                            : r.multiplier > 1.0
+                                ? '+${((r.multiplier - 1) * 100).round()}%'
+                                : '${((r.multiplier - 1) * 100).round()}%',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: r.multiplier >= 1.0
+                              ? AppColors.orange500
+                              : AppColors.green500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+              .toList(),
         ),
       ),
     );
@@ -297,7 +455,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  // ── Calculate Button ──────────────────────────────────────────────────────
+  // ── Calculate Button ───────���────────────────────��─────────────────────────
 
   Widget _buildCalculateButton(BuildContext context) {
     return ElevatedButton.icon(
@@ -313,12 +471,24 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _calculate(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
+    final double width;
+    final double length;
+    if (_inputMode == _InputMode.dimensions) {
+      width = _width!;
+      length = _length!;
+    } else {
+      // Derive equal-sided dimensions from area
+      final side = sqrt(_areaInput!);
+      width = side;
+      length = side;
+    }
     final project = ProjectModel(
       name: _nameController.text.trim(),
-      width: _width!,
-      length: _length!,
+      width: width,
+      length: length,
       floors: _floors,
       houseType: _houseType,
+      region: _region,
     );
     final estimate = MaterialCalculator.calculate(project);
     Navigator.push(

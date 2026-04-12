@@ -1,3 +1,4 @@
+import '../data/cost_config.dart';
 import '../models/material_estimate.dart';
 import '../models/project_model.dart';
 
@@ -28,10 +29,12 @@ class MaterialCalculator {
     final wallArea = perimeter * 3.2 * project.floors * 0.7;
     final bricks = (wallArea * 60.0).toInt();
 
-    // Costs
-    final totalCost = totalArea * project.houseType.costPerM2;
-    final structuralCost = totalCost * 0.6;
-    final finishingCost = totalCost * 0.4;
+    // Costs — base price adjusted by regional multiplier
+    final totalCost = totalArea *
+        project.houseType.costPerM2 *
+        project.region.multiplier;
+    final structuralCost = totalCost * CostConfig.structuralFraction;
+    final finishingCost  = totalCost * CostConfig.finishingFraction;
 
     return MaterialEstimate(
       project: project,

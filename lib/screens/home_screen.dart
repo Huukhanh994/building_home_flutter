@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_card.dart';
 import 'calculator_screen.dart';
+import 'history_screen.dart';
 import 'photo_calculator_screen.dart';
 import 'templates_screen.dart';
 
@@ -133,6 +134,16 @@ class HomeScreen extends StatelessWidget {
         titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
       ),
       backgroundColor: AppColors.green500,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.history_rounded, color: Colors.white),
+          tooltip: 'Lịch sử dự toán',
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const HistoryScreen()),
+          ),
+        ),
+      ],
     );
   }
 

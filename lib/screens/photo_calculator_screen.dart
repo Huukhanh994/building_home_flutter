@@ -6,7 +6,9 @@ import 'package:image_picker/image_picker.dart';
 
 import '../models/house_type.dart';
 import '../models/project_model.dart';
+import '../models/region.dart';
 import '../services/material_calculator.dart';
+import '../services/preferences_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_card.dart';
 import 'results_screen.dart';
@@ -28,6 +30,14 @@ class _PhotoCalculatorScreenState extends State<PhotoCalculatorScreen> {
   final _lengthCtrl = TextEditingController();
   int _floors       = 1;
   HouseType _type   = HouseType.twoStory;
+  Region _region    = Region.other;
+
+  @override
+  void initState() {
+    super.initState();
+    PreferencesService.getLastRegion()
+        .then((r) { if (mounted) setState(() => _region = r); });
+  }
 
   double? get _width  => double.tryParse(_widthCtrl.text);
   double? get _length => double.tryParse(_lengthCtrl.text);
@@ -75,6 +85,7 @@ class _PhotoCalculatorScreenState extends State<PhotoCalculatorScreen> {
       length: _length!,
       floors: _floors,
       houseType: _type,
+      region: _region,
     );
     final estimate = MaterialCalculator.calculate(project);
     Navigator.push(

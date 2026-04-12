@@ -12,6 +12,12 @@
 @import image_picker_ios;
 #endif
 
+#if __has_include(<in_app_purchase_storekit/InAppPurchasePlugin.h>)
+#import <in_app_purchase_storekit/InAppPurchasePlugin.h>
+#else
+@import in_app_purchase_storekit;
+#endif
+
 #if __has_include(<printing/PrintingPlugin.h>)
 #import <printing/PrintingPlugin.h>
 #else
@@ -24,12 +30,20 @@
 @import share_plus;
 #endif
 
+#if __has_include(<shared_preferences_foundation/SharedPreferencesPlugin.h>)
+#import <shared_preferences_foundation/SharedPreferencesPlugin.h>
+#else
+@import shared_preferences_foundation;
+#endif
+
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
   [FLTImagePickerPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTImagePickerPlugin"]];
+  [InAppPurchasePlugin registerWithRegistrar:[registry registrarForPlugin:@"InAppPurchasePlugin"]];
   [PrintingPlugin registerWithRegistrar:[registry registrarForPlugin:@"PrintingPlugin"]];
   [FPPSharePlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPSharePlusPlugin"]];
+  [SharedPreferencesPlugin registerWithRegistrar:[registry registrarForPlugin:@"SharedPreferencesPlugin"]];
 }
 
 @end

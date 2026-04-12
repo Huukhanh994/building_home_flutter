@@ -34,4 +34,36 @@ class MaterialEstimate {
     required this.finishingCost,
     required this.totalCost,
   });
+
+  Map<String, dynamic> toJson() => {
+        'project': project.toJson(),
+        'floorArea': floorArea,
+        'totalArea': totalArea,
+        'steel': steel,
+        'concrete': concrete,
+        'cement': cement,
+        'sand': sand,
+        'stone': stone,
+        'bricks': bricks,
+        'structuralCost': structuralCost,
+        'finishingCost': finishingCost,
+        'totalCost': totalCost,
+      };
+
+  factory MaterialEstimate.fromJson(Map<String, dynamic> json) =>
+      MaterialEstimate(
+        project:
+            ProjectModel.fromJson(json['project'] as Map<String, dynamic>),
+        floorArea: (json['floorArea'] as num).toDouble(),
+        totalArea: (json['totalArea'] as num).toDouble(),
+        steel: (json['steel'] as num).toDouble(),
+        concrete: (json['concrete'] as num).toDouble(),
+        cement: (json['cement'] as num).toDouble(),
+        sand: (json['sand'] as num).toDouble(),
+        stone: (json['stone'] as num).toDouble(),
+        bricks: json['bricks'] as int,
+        structuralCost: (json['structuralCost'] as num).toDouble(),
+        finishingCost: (json['finishingCost'] as num).toDouble(),
+        totalCost: (json['totalCost'] as num).toDouble(),
+      );
 }

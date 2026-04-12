@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/home_screen.dart';
+import 'services/premium_service.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -11,11 +12,23 @@ void main() {
       statusBarIconBrightness: Brightness.light,
     ),
   );
+  await PremiumService.instance.init();
   runApp(const BuildHomeApp());
 }
 
-class BuildHomeApp extends StatelessWidget {
+class BuildHomeApp extends StatefulWidget {
   const BuildHomeApp({super.key});
+
+  @override
+  State<BuildHomeApp> createState() => _BuildHomeAppState();
+}
+
+class _BuildHomeAppState extends State<BuildHomeApp> {
+  @override
+  void dispose() {
+    PremiumService.instance.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

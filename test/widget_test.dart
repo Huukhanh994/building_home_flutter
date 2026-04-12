@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:buildhome_vn/main.dart';
 import 'package:buildhome_vn/models/house_type.dart';
 import 'package:buildhome_vn/models/project_model.dart';
 import 'package:buildhome_vn/services/material_calculator.dart';
@@ -22,7 +21,8 @@ void main() {
       expect(result.concrete, equals(25.0));          // 100 * 0.25
       expect(result.sand, closeTo(12.5, 0.01));       // 25 * 0.5
       expect(result.stone, closeTo(20.0, 0.01));      // 25 * 0.8
-      expect(result.totalCost, equals(450000000.0));  // 100 * 4_500_000
+      // 100m² * 4_500_000/m² * 0.90 (Region.other multiplier)
+      expect(result.totalCost, closeTo(405000000.0, 1.0));
     });
 
     test('2 floor house 8x12', () {
