@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_card.dart';
 import 'calculator_screen.dart';
 import 'history_screen.dart';
+import 'house_viewer_screen.dart';
 import 'interactive_house_screen.dart';
+import 'phone_input_screen.dart';
 import 'photo_calculator_screen.dart';
 import 'templates_screen.dart';
 
@@ -65,6 +68,18 @@ class HomeScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                         builder: (_) => const InteractiveHouseScreen()),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _ActionCard(
+                  icon: Icons.view_in_ar_rounded,
+                  title: 'Xem Nhà 3D',
+                  subtitle: 'Mô hình 3D thực tế, xoay 360° & phóng to',
+                  color: const Color(0xFF0369A1),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const HouseViewerScreen()),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -155,6 +170,19 @@ class HomeScreen extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (_) => const HistoryScreen()),
           ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.logout_rounded, color: Colors.white),
+          tooltip: 'Đăng xuất',
+          onPressed: () async {
+            await AuthService.instance.logout();
+            if (context.mounted) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const PhoneInputScreen()),
+                (_) => false,
+              );
+            }
+          },
         ),
       ],
     );

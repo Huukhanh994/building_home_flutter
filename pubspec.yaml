@@ -26,11 +26,15 @@ dependencies:
   # Camera / image picker
   image_picker: ^1.1.2
 
+  # 3D model viewer (GLB/GLTF via model-viewer web component)
+  model_viewer_plus: ^1.8.0
+
   # HTTP client (backend API)
   http: ^1.2.2
 
   # Local persistence
   shared_preferences: ^2.3.2
+  flutter_secure_storage: ^9.2.2
 
   # In-app purchases
   in_app_purchase: ^3.2.0

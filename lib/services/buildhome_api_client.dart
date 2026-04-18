@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/component_estimate.dart';
 import '../models/house_component.dart';
+import '../models/house_model_dto.dart';
 
 /// HTTP client for the BuildHome Laravel backend.
 ///
@@ -14,10 +15,13 @@ class BuildhomeApiClient {
 
   final http.Client _client;
 
-  /// Override before first use for staging / prod
-  static String baseUrl = 'http://buildhome-api.test/api/v1';
+  /// Override before first use for staging / prod.
+  /// Android emulator: http://10.0.2.2:8000/api/v1
+  /// iOS simulator / macOS: http://127.0.0.1:8000/api/v1
+  /// Physical device: http://<LAN-IP>:8000/api/v1
+  static String baseUrl = 'http://192.168.1.130:8000/api/v1';
 
-  static const Duration _timeout = Duration(seconds: 10);
+  static const Duration _timeout = Duration(seconds: 30);
 
   /// POST /api/v1/component/calculate
   Future<ComponentEstimate> calculateComponent({
@@ -50,6 +54,28 @@ class BuildhomeApiClient {
     }
 
     return _parseEstimate(component, jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// GET /api/v1/house-models
+  Future<List<HouseModelDto>> fetchHouseModels() async {
+    final uri = Uri.parse('$baseUrl/house-models');
+    final response = await _client
+        .get(uri, headers: {'Accept': 'application/json'})
+        .timeout(_timeout);
+
+    if (response.statusCode != 200) {
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: _parseErrorMessage(response.body),
+      );
+    }
+
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    final list = body['data'] as List<dynamic>;
+    return list
+        .cast<Map<String, dynamic>>()
+        .map(HouseModelDto.fromJson)
+        .toList();
   }
 
   // ── Parsing ───────────────────────────────────────────────────────────────

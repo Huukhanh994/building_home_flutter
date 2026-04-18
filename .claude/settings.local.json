@@ -23,7 +23,18 @@
       "Bash(laravel --version)",
       "Bash(laravel new:*)",
       "Bash(php artisan:*)",
-      "Bash(curl -s -X POST http://buildhome-api.test/api/v1/component/calculate -H 'Content-Type: application/json' -d '{\"component\":\"roof_main\",\"area\":120,\"house_type\":\"thai_roof\",\"floors\":1}')"
+      "Bash(curl -s -X POST http://buildhome-api.test/api/v1/component/calculate -H 'Content-Type: application/json' -d '{\"component\":\"roof_main\",\"area\":120,\"house_type\":\"thai_roof\",\"floors\":1}')",
+      "Read(//Users/khanhho/Herd/buildhome-api/app/Http/Controllers/Api/V1/**)",
+      "Read(//Users/khanhho/Herd/buildhome-api/app/Http/Controllers/**)",
+      "Read(//Users/khanhho/Herd/buildhome-api/app/Models/**)",
+      "Read(//Users/khanhho/Herd/buildhome-api/routes/**)",
+      "Bash(composer require:*)",
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/house-models)",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s http://192.168.1.130:8000/api/v1/house-models)",
+      "Bash(curl -sI http://127.0.0.1:8000/storage/models/Apartmentbuilding.glb)",
+      "Bash(curl -sI -H \"Origin: http://127.0.0.1:33091\" http://127.0.0.1:8000/storage/models/Apartmentbuilding.glb)",
+      "Bash(curl -sI -H \"Origin: http://127.0.0.1:33091\" http://127.0.0.1:8000/api/v1/house-models/1/file)"
     ]
   }
 }
